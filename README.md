@@ -1,2 +1,2 @@
 # Twitter-2.0
-My attempt at creating a Twitter clone, using IPC System V - mainly semaphores and shared memory
+My attempt at creating a terminal Twitter clone, using IPC System V - mainly semaphores and shared memory for training purposes. This code was only tested for Linux (Ubuntu), it will not work on Windows. The server must first be started, for the client to work. I am planning to expand on this project for training purposes - first goal will be to add more functionality and work on individual semaphores per post.
