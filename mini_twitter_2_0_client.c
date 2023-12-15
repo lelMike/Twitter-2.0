@@ -19,12 +19,20 @@ struct record {
 };
 
 void waitSemaphore(int semid) {
-    struct sembuf sem_wait = {0, -1, 0};
+    struct sembuf sem_wait = {
+            .sem_num = 0,
+            .sem_op = -1,
+            .sem_flg = 0
+    };
     semop(semid, &sem_wait, 1);
 }
 
 void freeSemaphore(int semid) {
-    struct sembuf sem_signal = {0, 1, 0};
+    struct sembuf sem_signal = {
+            .sem_num = 0,
+            .sem_op = 1,
+            .sem_flg = 0
+    };
     semop(semid, &sem_signal, 1);
 }
 
@@ -78,7 +86,7 @@ int main(int argc, char **argv) {
     int i = 0; int free_slots = n;
     waitSemaphore(semid);
     for(i; i < n; i++){
-        if(strcmp(shared_data[i].username, "NULL") != 0 || strcmp(shared_data[i].post, "NULL") != 0 || shared_data[i].likes != 0){
+        if(shared_data[i].likes != -1){
             if(free_slots == n){
                 printf("Istniejace wpisy\n");
             }
@@ -96,7 +104,7 @@ int main(int argc, char **argv) {
         i = 0; free_slots = n; int first_free_slot = 0;
         waitSemaphore(semid);
         for(i; i < n; i++) {
-            if (strcmp(shared_data[i].username, "NULL") == 0 && strcmp(shared_data[i].post, "NULL") == 0 && shared_data[i].likes == 0) {
+            if (shared_data[i].likes == -1) {
                 if(free_slots == n){
                     first_free_slot = i;
                 }
@@ -107,8 +115,13 @@ int main(int argc, char **argv) {
             printf("Napisz co ci chodzi po glowie:\n");
             char text[MAX_POST]; getchar();
             fgets(text, sizeof(text), stdin);
+            size_t len = strlen(text);
+            if (len > 0 && text[len - 1] == '\n') {
+                text[len - 1] = '\0';
+            }
             strncpy(shared_data[first_free_slot].username, user, sizeof(shared_data[first_free_slot].username) - 1);
             strncpy(shared_data[first_free_slot].post, text, sizeof(shared_data[first_free_slot].post) - 1);
+            shared_data[first_free_slot].likes = 0;
             freeSemaphore(semid);
         }
         else{
@@ -125,7 +138,7 @@ int main(int argc, char **argv) {
         }
         else{
             waitSemaphore(semid);
-            if(strcmp(shared_data[num-1].username, "NULL") == 0 && strcmp(shared_data[num-1].post, "NULL") == 0 && shared_data[num-1].likes == 0){
+            if(shared_data[num-1].likes == -1){
                 printf("Nie istnieje taki post\n");
             }
             else{
