@@ -121,8 +121,12 @@ int main(int argc, char **argv) {
     printf(" OK (klucz: %d)\n", key);
 
     printf("[Serwer]: Tworze segment pamieci wspoldzielonej na %d wpisow po %ldb", n, sizeof(struct record)); fflush(stdout); sleepSeconds(6); printf("."); fflush(stdout); sleepSeconds(6); printf("."); fflush(stdout); sleepSeconds(6); printf(".\n"); fflush(stdout); sleepSeconds(3);
-    int shmid = shmget(key, n * sizeof(struct record), IPC_CREAT | 0666);
+    int shmid = shmget(key, n * sizeof(struct record), IPC_CREAT | IPC_CREAT | 0666);
     if (shmid == -1) {
+        if (errno == EEXIST){
+            perror("Istnieje pamiec wspoldzielona");
+            exit(EXIT_FAILURE);
+        }
         perror("shmget");
         exit(EXIT_FAILURE);
     }
@@ -133,9 +137,23 @@ int main(int argc, char **argv) {
     printf(" OK (adres: %p)\n", &shared_data);
 
     printf("[Serwer]: Tworze semafor"); fflush(stdout); sleepSeconds(6); printf(".");
-    int sem_flags = IPC_CREAT | 0666;
+    int sem_flags = IPC_CREAT | IPC_CREAT | 0666;
     int semid = semget(key, 1, sem_flags);
     if (semid == -1) {
+        if(errno == EEXIST){
+            printf("([BLAD] Semafor juz istnieje\nodlaczenie pamieci wspoldzielonej: ");
+            if (shmdt(shared_data) == -1) {
+                perror("shmdt");
+            }
+
+            printf("OK, usuniecie pamieci wspoldzielonej: ");
+            if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+                perror("shmctl");
+            }
+            printf("OK\n");
+            perror("Semafor juz istnieje");
+            exit(EXIT_FAILURE);
+        }
         perror("semget");
         exit(EXIT_FAILURE);
     }

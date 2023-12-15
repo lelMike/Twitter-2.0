@@ -38,7 +38,7 @@ void freeSemaphore(int semid) {
 
 int main(int argc, char **argv) {
     if (argc != 3) {
-        fprintf(stderr, "Usage: %s <shared_memory_key> <username>\n", argv[0]);
+        fprintf(stderr, "Użycie: %s <shared_memory_key> <username>\n", argv[0]);
         return EXIT_FAILURE;
     }
     printf("Twitter 2.0 wita! (wersja B)\n");
