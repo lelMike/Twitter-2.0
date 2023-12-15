@@ -30,12 +30,20 @@ void sleepSeconds(long nanoseconds) {
 }
 
 void waitSemaphore(int semid) {
-    struct sembuf sem_wait = {0, -1, 0};
+    struct sembuf sem_wait = {
+            .sem_num = 0,
+            .sem_op = -1,
+            .sem_flg = 0
+    };
     semop(semid, &sem_wait, 1);
 }
 
 void freeSemaphore(int semid) {
-    struct sembuf sem_signal = {0, 1, 0};
+    struct sembuf sem_signal = {
+            .sem_num = 0,
+            .sem_op = 1,
+            .sem_flg = 0
+    };
     semop(semid, &sem_signal, 1);
 }
 
@@ -52,9 +60,9 @@ void handleSIGINT(int signum) {
 }
 
 void initializeCell(struct record *rec) {
-    snprintf(rec->username, sizeof(rec->username), "NULL");
-    snprintf(rec->post, sizeof(rec->post), "NULL");
-    rec->likes = 0;
+    rec->username[0] = '\0';
+    rec->post[0] = '\0';
+    rec->likes = -1;
 }
 
 void cleanup(int shmid, int semid, struct record *shared_data) {
@@ -161,7 +169,7 @@ int main(int argc, char **argv) {
             i = 0; char twitter_handle = 0; char none_achieved = 1;
             waitSemaphore(semid);
             for (i; i < n; i++) {
-                if (strcmp(shared_data[i].username, "NULL") != 0 || strcmp(shared_data[i].post, "NULL") != 0 || shared_data[i].likes != 0) {
+                if (shared_data[i].likes != -1) {
                     if (twitter_handle == 0){
                         printf("___________  Twitter 2.0:  ___________\n"); twitter_handle = 1;
                     }
