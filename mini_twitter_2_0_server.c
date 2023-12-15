@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 
 #define SEMAPHORE_KEY 's'
 #define MAX_KEY_LENGTH 255
